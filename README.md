@@ -4,7 +4,7 @@
 
 ## 開啟
 
-雙擊 index.html，使用現代 Edge / Chrome 即可。所有檔案請放在同一資料夾。
+雙擊 index.html，使用現代 Edge / Chrome 即可。應用程式的 HTML、CSS 與 JavaScript 已全部合併在這一個檔案，複製或攜帶時只需要 index.html；不需要其他程式檔。
 
 若瀏覽器限制 file:// 的儲存或檔案 API，可使用 Python 3 執行 python serve.py，開啟 http://127.0.0.1:8765 。它只監聽本機介面。不同網址與直接開啟 HTML 使用不同瀏覽器儲存區，請用 JSON 搬移資料。
 
@@ -57,10 +57,9 @@
 
 Node.js 18+ 執行 node tests.cjs；不需 npm install。測試涵蓋資料升級、跨年與閏年、工作日與假日、相依循環／順延、基準、複製 ID、批次表單、檔案寫入順序與失敗處理、Excel 封裝及應用程式資料流程。DOM stub 測試不能取代真實瀏覽器操作驗證。
 
-- core.js：日期與排程／資料規則。
-- app.js：介面、互動、儲存與檔案操作。
-- exports.js：無依賴 XLSX ZIP 封裝與 PNG 畫布匯出。
-- tests.cjs：核心與應用整合檢查。
+- index.html：完整工具。內含樣式，以及以 data-flow-source 標示的 core（日期與排程）、exports（Excel／PNG 匯出）、app（介面與儲存）區段；直接在同一檔案維護。
+- tests.cjs：從 index.html 讀取內嵌程式，執行核心與應用整合檢查；使用工具時不需要此檔。
+- serve.py：選用的本機預覽伺服器；直接開啟 HTML 時不需要。
 - backup-before-v2/：本機保留舊版來源，已排除 Git。
 
 本次環境的瀏覽器驗證因工具無法判定 Windows 瀏覽器網址而中止；已進行的程式檢查與真實 UI 驗證應分開看待。

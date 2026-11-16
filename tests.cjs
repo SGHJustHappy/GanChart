@@ -1,7 +1,10 @@
 /* Run with Node 18+: node tests.cjs. No dependencies. */
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),path=require('node:path');
 async function run(){
-const root=__dirname,ctx={crypto:require('node:crypto').webcrypto,structuredClone,Blob,TextEncoder,console};vm.createContext(ctx);for(const file of ['core.js','exports.js'])vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),ctx,{filename:file});const C=ctx.FlowCore,X=ctx.FlowExport;let passed=0;const check=(name,fn)=>{try{fn();passed++;}catch(e){throw Error(name+': '+e.message,{cause:e});}};
+const root=__dirname,html=fs.readFileSync(path.join(root,'index.html'),'utf8');
+function source(name){const marker=`<script data-flow-source="${name}">`,start=html.indexOf(marker);assert.ok(start>=0,`Missing inline ${name} section`);const end=html.indexOf('</script>',start+marker.length);assert.ok(end>=0,`Unclosed inline ${name} section`);return html.slice(start+marker.length,end);}
+assert.ok(!/<script\b[^>]*\bsrc=|<link\b[^>]*rel="stylesheet"/i.test(html),'Application must be a standalone HTML');
+const ctx={crypto:require('node:crypto').webcrypto,structuredClone,Blob,TextEncoder,console};vm.createContext(ctx);for(const name of ['core','exports'])vm.runInContext(source(name),ctx,{filename:'index.html#'+name});const C=ctx.FlowCore,X=ctx.FlowExport;let passed=0;const check=(name,fn)=>{try{fn();passed++;}catch(e){throw Error(name+': '+e.message,{cause:e});}};
 const task=(id,start='2026-11-16',end='2026-11-17',deps=[])=>({id,name:id,start,end,deps,color:'#7455d8',status:'未開始',progress:0,owner:'Alex',notes:'',hours:8});
 const project=ts=>({id:'p',name:'專案',groups:[{id:'g',name:'群組',tasks:ts,collapsed:false}]});
 const fresh=ts=>C.normalize({version:1,projects:[project(ts)]});
@@ -40,7 +43,7 @@ check('xlsx required files and escaped Chinese',()=>{assert.ok(entries['xl/workb
 // App integration in a deterministic DOM stub; this does not replace browser QA.
 const els=new Map();function el(s){if(!els.has(s))els.set(s,{value:'',style:{setProperty(){}},dataset:{},clientWidth:1200,scrollHeight:500,offsetTop:100,innerHTML:'',textContent:'',getBoundingClientRect(){return {width:330,left:0}},addEventListener(){},append(){},prepend(){},focus(){},showModal(){this.open=true},close(){this.open=false}});return els.get(s);}
 Object.assign(ctx,{location:{hash:''},localStorage:{getItem(){return null},setItem(){}},document:{querySelector:el,querySelectorAll(){return []},addEventListener(){},createElement(){return el('new')},createElementNS(){return {...el('svg'),setAttribute(){}}}},window:{addEventListener(){},history:{replaceState(){}},print(){}},setTimeout(){return 1},clearTimeout(){},confirm(){return true}});
-vm.runInContext(fs.readFileSync(path.join(root,'app.js'),'utf8'),ctx,{filename:'app.js'});
+vm.runInContext(source('app'),ctx,{filename:'index.html#app'});
 function app(code){return vm.runInContext(code,ctx);}
 check('app empty boot',()=>assert.ok(el('#title').textContent.includes('第一個')));
 check('app cross-year timeline render and collapse',()=>{ctx.fixture=project([task('a','2026-12-28','2027-01-06')]);app("change(()=>{db.projects.push(fixture);active='p';});");assert.equal(app('timeline.cols.length'),3);app('project().groups[0].collapsed=true;render();');assert.ok(el('#grid').innerHTML.includes('data-bar="a"'));});
