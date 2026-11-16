@@ -1,0 +1,10 @@
+backup-before-*/
+.qa/
+node_modules/
+Flow-*.json
+Flow-*.png
+Flow-*.xlsx
+*.tmp
+__pycache__/
+.DS_Store
+Thumbs.db
