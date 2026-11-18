@@ -10,7 +10,7 @@ const project=ts=>({id:'p',name:'專案',groups:[{id:'g',name:'群組',tasks:ts,
 const fresh=ts=>C.normalize({version:1,projects:[project(ts)]});
 const calendar=C.defaults(),work={...C.defaults(),useWorkdays:true,holidays:['2026-11-17']};
 check('Sunday and year boundaries',()=>{for(const [d,label]of [['2026-01-01','W601'],['2026-01-03','W601'],['2026-01-04','W602'],['2026-12-31','W653'],['2027-01-01','W701'],['2027-01-03','W702']])assert.equal(C.period(C.date(d),'week').label,label);});
-check('ten-day month quarter leap year',()=>{for(const [d,mode,label]of [['2026-11-10','submonth','M611 B'],['2026-11-11','submonth','M611 M'],['2026-11-21','submonth','M611 E'],['2028-02-29','month','M802'],['2027-01-01','quarter','Q71']])assert.equal(C.period(C.date(d),mode).label,label);assert.equal(C.iso(C.period(C.date('2028-02-29'),'submonth').b),'2028-03-01');});
+check('ten-day month quarter leap year',()=>{for(const [d,mode,label]of [['2026-11-10','submonth','M611 B'],['2026-11-11','submonth','M611 M'],['2026-11-21','submonth','M611 E'],['2028-02-29','month','M802'],['2027-01-01','quarter','27Q1']])assert.equal(C.period(C.date(d),mode).label,label);assert.equal(C.iso(C.period(C.date('2028-02-29'),'submonth').b),'2028-03-01');});
 check('legacy data migrate',()=>{const t=task('a');delete t.deps;delete t.hours;const d=fresh([t]);assert.equal(d.version,2);assert.equal(d.projects[0].groups[0].tasks[0].hours,8);assert.equal(d.templates.length,0);});
 check('unscheduled accepts empty dates',()=>assert.equal(fresh([task('a','','')]).projects[0].groups[0].tasks[0].start,''));
 check('end without start rejects',()=>assert.throws(()=>fresh([task('a','','2026-11-17')])));
