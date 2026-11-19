@@ -6,12 +6,20 @@ import argparse
 import webbrowser
 
 
+
+class NoCacheHandler(SimpleHTTPRequestHandler):
+    """Always serve the current files so edits show up on a normal reload."""
+    def end_headers(self):
+        self.send_header("Cache-Control", "no-store")
+        super().end_headers()
+
+
 def main():
     parser = argparse.ArgumentParser(description="Open Flow Gantt on localhost")
     parser.add_argument("--port", type=int, default=8765)
     parser.add_argument("--no-browser", action="store_true")
     args = parser.parse_args()
-    handler = partial(SimpleHTTPRequestHandler, directory=str(Path(__file__).resolve().parent))
+    handler = partial(NoCacheHandler, directory=str(Path(__file__).resolve().parent))
     try:
         server = ThreadingHTTPServer(("127.0.0.1", args.port), handler)
     except OSError as exc:
